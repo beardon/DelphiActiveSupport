@@ -82,7 +82,7 @@ var
   className: string;
 begin
   className := Camelize(TableName);
-  className := Pluralize(className);
+  className := Singularize(className);
   Result := className;
 end;
 
