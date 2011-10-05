@@ -5,15 +5,56 @@ interface
 type
   TDelphinator = class
   public
+    class function ConcatLongString(const InStr: string; const Multiline: Boolean): string;
+    class function FixReservedWords(const Value: string): string;
     class function MySQLTypeToDelphiType(const SQLType: string): string;
     class function MySQLTypeToDelphiAsType(const SQLType: string): string;
-    class function FixReservedWords(const Value: string): string;
   end;
 
 implementation
 
 uses
   SysUtils;
+
+const
+  CRLF = #13#10;
+  CRLF2 = CRLF + CRLF;
+  TAB = '  ';
+  TAB2 = TAB + TAB;
+
+class function TDelphinator.ConcatLongString(const InStr: string; const Multiline: Boolean): string;
+const
+  BREAK_COUNT = 150;
+var
+  outStr, delim: string;
+begin
+  outStr := InStr;
+  if (Length(InStr) > BREAK_COUNT) then
+  begin
+    if (Multiline) then
+    begin
+      delim := ''' + ' + CRLF + TAB2 + '''';
+    end
+    else
+    begin
+      delim := ''' + ''';
+    end;
+    outStr := Copy(InStr, 1, BREAK_COUNT) + delim + ConcatLongString(Copy(InStr, BREAK_COUNT + 1, MaxInt), Multiline);
+  end;
+  Result := outStr;
+end;
+
+class function TDelphinator.FixReservedWords(const Value: string): string;
+const
+  RESERVED_WORDS = 'ClassTypeUnitNameLabelProgram';
+var
+  corrected: string;
+begin
+  corrected := Value;
+  if (Pos(Value, RESERVED_WORDS) > 0) then
+    corrected := Value + '_';
+  Result := corrected;
+end;
 
 class function TDelphinator.MySQLTypeToDelphiType(const SQLType: string): string;
 var
@@ -59,18 +100,6 @@ begin
   if ((Pos('blob', sqlTypeL) > 0) or (Pos('binary', sqlTypeL) > 0)) then
     asType := 'AsVariant';
   Result := asType;
-end;
-
-class function TDelphinator.FixReservedWords(const Value: string): string;
-const
-  RESERVED_WORDS = 'ClassTypeUnitNameLabelProgram';
-var
-  corrected: string;
-begin
-  corrected := Value;
-  if (Pos(Value, RESERVED_WORDS) > 0) then
-    corrected := Value + '_';
-  Result := corrected;
 end;
 
 end.
