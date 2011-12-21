@@ -70,10 +70,13 @@ begin
     delphiType := 'Extended';
   if ((Pos('char', sqlTypeL) > 0) or (Pos('text', sqlTypeL) > 0) or (Pos('enum', sqlTypeL) > 0) or (Pos('set', sqlTypeL) > 0)) then
     delphiType := 'string';
-  if ((Pos('datetime', sqlTypeL) > 0) or (Pos('timestamp', sqlTypeL) > 0)) then
+// TODO: MyDAC components will not assign TDate values to query parameters in expected format, will have to use TDateTime for all
+  if ((Pos('date', sqlTypeL) > 0) or (Pos('timestamp', sqlTypeL) > 0)) then
     delphiType := 'TDateTime'
-  else if (Pos('date', sqlTypeL) > 0) then
-    delphiType := 'TDate'
+//  if ((Pos('datetime', sqlTypeL) > 0) or (Pos('timestamp', sqlTypeL) > 0)) then
+//    delphiType := 'TDateTime'
+//  else if (Pos('date', sqlTypeL) > 0) then
+//    delphiType := 'TDate'
   else if (Pos('time', sqlTypeL) > 0) then
     delphiType := 'TTime';
   if ((Pos('blob', sqlTypeL) > 0) or (Pos('binary', sqlTypeL) > 0)) then
