@@ -64,8 +64,10 @@ begin
   sqlTypeL := LowerCase(SQLType);
   if (Pos('tinyint(1)', sqlTypeL) > 0) then
     delphiType := 'Boolean'
-  else if ((Pos('int', sqlTypeL) > 0) or (Pos('decimal', sqlTypeL) > 0)) then
+  else if (Pos('int', sqlTypeL) > 0) then
     delphiType := 'Integer';
+  if (Pos('decimal', sqlTypeL) > 0) then
+    delphiType := 'Currency';
   if ((Pos('float', sqlTypeL) > 0) or (Pos('double', sqlTypeL) > 0)) then
     delphiType := 'Extended';
   if ((Pos('char', sqlTypeL) > 0) or (Pos('text', sqlTypeL) > 0) or (Pos('enum', sqlTypeL) > 0) or (Pos('set', sqlTypeL) > 0)) then
@@ -92,8 +94,10 @@ begin
   sqlTypeL := LowerCase(SQLType);
   if (Pos('tinyint(1)', sqlTypeL) > 0) then
     asType := 'AsBoolean'
-  else if ((Pos('int', sqlTypeL) > 0) or (Pos('decimal', sqlTypeL) > 0)) then
+  else if (Pos('int', sqlTypeL) > 0) then
     asType := 'AsInteger';
+  if (Pos('decimal', sqlTypeL) > 0) then
+    asType := 'AsCurrency';
   if ((Pos('float', sqlTypeL) > 0) or (Pos('double', sqlTypeL) > 0)) then
     asType := 'AsExtended';
   if ((Pos('char', sqlTypeL) > 0) or (Pos('text', sqlTypeL) > 0) or (Pos('enum', sqlTypeL) > 0) or (Pos('set', sqlTypeL) > 0)) then
