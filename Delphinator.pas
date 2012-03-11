@@ -7,8 +7,8 @@ type
   public
     class function ConcatLongString(const InStr: string; const Multiline: Boolean): string;
     class function FixReservedWords(const Value: string): string;
-    class function MySQLTypeToDelphiType(const SQLType: string): string;
-    class function MySQLTypeToDelphiAsType(const SQLType: string): string;
+    class function MySQLTypeToDelphiType(const SQLType: string; const IsNullable: Boolean): string;
+    class function MySQLTypeToDelphiAsType(const SQLType: string; const IsNullable: Boolean): string;
   end;
 
 implementation
@@ -56,7 +56,7 @@ begin
   Result := corrected;
 end;
 
-class function TDelphinator.MySQLTypeToDelphiType(const SQLType: string): string;
+class function TDelphinator.MySQLTypeToDelphiType(const SQLType: string; const IsNullable: Boolean): string;
 var
   delphiType, sqlTypeL: string;
 begin
@@ -73,20 +73,25 @@ begin
   if ((Pos('char', sqlTypeL) > 0) or (Pos('text', sqlTypeL) > 0) or (Pos('enum', sqlTypeL) > 0) or (Pos('set', sqlTypeL) > 0)) then
     delphiType := 'string';
 // TODO: MyDAC components will not assign TDate values to query parameters in expected format, will have to use TDateTime for all
-  if ((Pos('date', sqlTypeL) > 0) or (Pos('timestamp', sqlTypeL) > 0)) then
-    delphiType := 'TDateTime'
+  if ((Pos('date', sqlTypeL) > 0) or (Pos('time', sqlTypeL) > 0)) then
+  begin
+    if (IsNullable) then
+      delphiType := 'Variant'
+    else
+      delphiType := 'TDateTime';
+  end;
 //  if ((Pos('datetime', sqlTypeL) > 0) or (Pos('timestamp', sqlTypeL) > 0)) then
 //    delphiType := 'TDateTime'
 //  else if (Pos('date', sqlTypeL) > 0) then
 //    delphiType := 'TDate'
-  else if (Pos('time', sqlTypeL) > 0) then
-    delphiType := 'TTime';
+//  else if (Pos('time', sqlTypeL) > 0) then
+//    delphiType := 'TTime';
   if ((Pos('blob', sqlTypeL) > 0) or (Pos('binary', sqlTypeL) > 0)) then
     delphiType := 'Variant';
   Result := delphiType;
 end;
 
-class function TDelphinator.MySQLTypeToDelphiAsType(const SQLType: string): string;
+class function TDelphinator.MySQLTypeToDelphiAsType(const SQLType: string; const IsNullable: Boolean): string;
 var
   asType, sqlTypeL: string;
 begin
@@ -103,7 +108,12 @@ begin
   if ((Pos('char', sqlTypeL) > 0) or (Pos('text', sqlTypeL) > 0) or (Pos('enum', sqlTypeL) > 0) or (Pos('set', sqlTypeL) > 0)) then
     asType := 'AsString';
   if ((Pos('date', sqlTypeL) > 0) or (Pos('time', sqlTypeL) > 0)) then
-    asType := 'AsDateTime';
+  begin
+    if (IsNullable) then
+      asType := 'AsVariant'
+    else
+      asType := 'AsDateTime';
+  end;
   if ((Pos('blob', sqlTypeL) > 0) or (Pos('binary', sqlTypeL) > 0)) then
     asType := 'AsVariant';
   Result := asType;
