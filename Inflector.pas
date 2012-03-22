@@ -5,11 +5,12 @@ interface
 type
   TInflector = class
   private
+    const WORD_DELIMITER = '_';
     class function IrregularToPlural(const Word: string): string;
     class function IrregularToSingular(const Word: string): string;
     class function Uncountable(const Word: string): Boolean;
   public
-    class function Camelize(const LowerCaseAndUnderscoredWord: string; const FirstLetterInUppercase: Boolean = True): string;
+    class function Camelize(const LowerCaseAndDelimitedWord: string; const FirstLetterInUppercase: Boolean = True): string;
     class function Classify(const TableName: string): string;
     class function Memberify(const FieldName: string): string;
     class function Pluralize(const Word: string): string;
@@ -28,25 +29,26 @@ uses
 {**
  * By default, Camelize converts strings to UpperCamelCase. If the argument to FirstLetterInUppercase is set to False then Camelize produces lowerCamelCase.
  *
- * @param string LowerCaseAndUnderscoredWord
+ * @param string LowerCaseAndDelimitedWord
  * @param Boolean FirstLetterInUppercase
  * @return string
  *}
-class function TInflector.Camelize(const LowerCaseAndUnderscoredWord: string; const FirstLetterInUppercase: Boolean = True): string;
+class function TInflector.Camelize(const LowerCaseAndDelimitedWord: string; const FirstLetterInUppercase: Boolean = True): string;
 var
   i: Integer;
   cameled: string;
   humps: TStringList;
 begin
   humps := TStringList.Create;
-  humps.Delimiter := '_';
-  humps.DelimitedText := LowerCaseAndUnderscoredWord;
+  humps.Delimiter := WORD_DELIMITER;
+  humps.DelimitedText := LowerCaseAndDelimitedWord;
   for i := 0 to humps.Count - 1 do
     cameled := cameled + UpperCase(humps[i][1]) + Copy(humps[i], 2, MaxInt);
   if (not FirstLetterInUppercase) then
     Result := LowerCase(cameled[1]) + Copy(cameled, 2, MaxInt)
   else
     Result := cameled;
+  humps.Free;
 end;
 
 {**
@@ -122,27 +124,36 @@ end;
  *}
 class function TInflector.Pluralize(const Word: string): string;
 var
-  i: Integer;
+  i, j: Integer;
   pluralWord: string;
   pat, repl: string;
+  words: TStringList;
 begin
-  pluralWord := Word;
-  if (Not Uncountable(pluralWord)) then
+  words := TStringList.Create;
+  words.Delimiter := WORD_DELIMITER;
+  words.DelimitedText := Word;
+  for i := 0 to words.Count - 1 do
   begin
-    pluralWord := IrregularToPlural(pluralWord);
-    if (pluralWord = Word) then
-    for i := High(INFLECTOR_PLURALS) downto Low(INFLECTOR_PLURALS) do
+    pluralWord := words[i];
+    if (Not Uncountable(pluralWord)) then
     begin
-      pat := INFLECTOR_PLURALS[i, 0];
-      repl := INFLECTOR_PLURALS[i, 1];
-      if TRegEx.Match(pluralWord, pat, [roIgnoreCase]).Success then
+      pluralWord := IrregularToPlural(pluralWord);
+      if (pluralWord = Word) then
+      for j := High(INFLECTOR_PLURALS) downto Low(INFLECTOR_PLURALS) do
       begin
-        pluralWord := TRegEx.Replace(pluralWord, pat, repl, [roIgnoreCase]);
-        break;
+        pat := INFLECTOR_PLURALS[j, 0];
+        repl := INFLECTOR_PLURALS[j, 1];
+        if TRegEx.Match(pluralWord, pat, [roIgnoreCase]).Success then
+        begin
+          pluralWord := TRegEx.Replace(pluralWord, pat, repl, [roIgnoreCase]);
+          break;
+        end;
       end;
     end;
+    words[i] := pluralWord;
   end;
-  Result := pluralWord;
+  Result := words.DelimitedText;
+  words.Free;
 end;
 
 {**
@@ -153,24 +164,33 @@ end;
  *}
 class function TInflector.Singularize(const Word: string): string;
 var
-  i: Integer;
+  i, j: Integer;
   singularWord: string;
+  words: TStringList;
 begin
-  singularWord := Word;
-  if (Not Uncountable(singularWord)) then
+  words := TStringList.Create;
+  words.Delimiter := WORD_DELIMITER;
+  words.DelimitedText := Word;
+  for i := 0 to words.Count - 1 do
   begin
-    singularWord := IrregularToSingular(singularWord);
-    if (singularWord = Word) then
-    for i := High(INFLECTOR_SINGULARS) downto Low(INFLECTOR_SINGULARS) do
+    singularWord := words[i];
+    if (Not Uncountable(singularWord)) then
     begin
-      if TRegEx.Match(singularWord, INFLECTOR_SINGULARS[i, 0], [roIgnoreCase]).Success then
+      singularWord := IrregularToSingular(singularWord);
+      if (singularWord = Word) then
+      for j := High(INFLECTOR_SINGULARS) downto Low(INFLECTOR_SINGULARS) do
       begin
-        singularWord := TRegEx.Replace(singularWord, INFLECTOR_SINGULARS[i, 0], INFLECTOR_SINGULARS[i, 1], [roIgnoreCase]);
-        Break;
+        if TRegEx.Match(singularWord, INFLECTOR_SINGULARS[j, 0], [roIgnoreCase]).Success then
+        begin
+          singularWord := TRegEx.Replace(singularWord, INFLECTOR_SINGULARS[j, 0], INFLECTOR_SINGULARS[j, 1], [roIgnoreCase]);
+          Break;
+        end;
       end;
     end;
+    words[i] := singularWord;
   end;
-  Result := singularWord;
+  Result := words.DelimitedText;
+  words.Free;
 end;
 
 class function TInflector.Uncountable(const Word: string): Boolean;
