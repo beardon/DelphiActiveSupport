@@ -59,8 +59,8 @@ class function TInflector.Classify(const TableName: string): string;
 var
   className: string;
 begin
-  className := Camelize(TableName);
-  className := Singularize(className);
+  className := Singularize(TableName);
+  className := Camelize(className);
   className := TDelphinator.FixReservedWords(className);
   Result := className;
 end;
@@ -88,7 +88,7 @@ begin
   irregular := Word;
   for i := High(INFLECTOR_IRREGULARS) downto Low(INFLECTOR_IRREGULARS) do
   begin
-    if irregular = INFLECTOR_IRREGULARS[i, 0] then
+    if LowerCase(irregular) = INFLECTOR_IRREGULARS[i, 0] then
     begin
       irregular := INFLECTOR_IRREGULARS[i, 1];
       Break;
@@ -105,7 +105,7 @@ begin
   irregular := Word;
   for i := Low(INFLECTOR_IRREGULARS) to High(INFLECTOR_IRREGULARS) do
   begin
-    if irregular = INFLECTOR_IRREGULARS[i, 1] then
+    if LowerCase(irregular) = INFLECTOR_IRREGULARS[i, 1] then
     begin
       irregular := INFLECTOR_IRREGULARS[i, 0];
       Break;
@@ -181,7 +181,7 @@ begin
   found := False;
   for i := High(INFLECTOR_UNCOUNTABLE) downto Low(INFLECTOR_UNCOUNTABLE) do
   begin
-    if (Word = INFLECTOR_UNCOUNTABLE[i]) then
+    if (LowerCase(Word) = INFLECTOR_UNCOUNTABLE[i]) then
     begin
       found := True;
       Break;
