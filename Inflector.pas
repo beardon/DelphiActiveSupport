@@ -138,7 +138,7 @@ begin
     if (Not Uncountable(pluralWord)) then
     begin
       pluralWord := IrregularToPlural(pluralWord);
-      if (pluralWord = Word) then
+      if (pluralWord = words[i]) then
       for j := High(INFLECTOR_PLURALS) downto Low(INFLECTOR_PLURALS) do
       begin
         pat := INFLECTOR_PLURALS[j, 0];
@@ -177,7 +177,7 @@ begin
     if (Not Uncountable(singularWord)) then
     begin
       singularWord := IrregularToSingular(singularWord);
-      if (singularWord = Word) then
+      if (singularWord = words[i]) then
       for j := High(INFLECTOR_SINGULARS) downto Low(INFLECTOR_SINGULARS) do
       begin
         if TRegEx.Match(singularWord, INFLECTOR_SINGULARS[j, 0], [roIgnoreCase]).Success then
