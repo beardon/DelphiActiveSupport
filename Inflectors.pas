@@ -62,7 +62,7 @@ const
     ('cow', 'kine'),
     ('zombie', 'zombies'));
 
-  INFLECTOR_UNCOUNTABLE: array[0..8] of string =
+  INFLECTOR_UNCOUNTABLE: array[0..9] of string =
     ('equipment', 'information', 'rice', 'money', 'species', 'series', 'fish', 'sheep', 'jeans', 'miscellaneous');
 
 implementation
