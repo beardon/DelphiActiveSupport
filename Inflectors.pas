@@ -63,7 +63,7 @@ const
     ('zombie', 'zombies'));
 
   INFLECTOR_UNCOUNTABLE: array[0..8] of string =
-    ('equipment', 'information', 'rice', 'money', 'species', 'series', 'fish', 'sheep', 'jeans');
+    ('equipment', 'information', 'rice', 'money', 'species', 'series', 'fish', 'sheep', 'jeans', 'miscellaneous');
 
 implementation
 
