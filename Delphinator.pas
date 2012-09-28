@@ -62,7 +62,7 @@ var
 begin
   delphiType := '';
   sqlTypeL := LowerCase(SQLType);
-  if (Pos('tinyint(1)', sqlTypeL) > 0) then
+  if ((Pos('tinyint(1)', sqlTypeL) > 0) or (Pos('bool', sqlTypeL) > 0)) then
     delphiType := 'Boolean'
   else if (Pos('int', sqlTypeL) > 0) then
     delphiType := 'Integer';
