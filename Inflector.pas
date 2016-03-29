@@ -6,15 +6,17 @@ type
   TInflector = class
   private
     const WORD_DELIMITER = '_';
+    const WORD_DELIMITERS: array[0..1] of string = (' ', '_');
     class function IrregularToPlural(const Word: string): string;
     class function IrregularToSingular(const Word: string): string;
     class function Uncountable(const Word: string): Boolean;
   public
-    class function Camelize(const LowerCaseAndDelimitedWord: string; const FirstLetterInUppercase: Boolean = True): string;
+    class function Camelize(const Term: string; const UppercaseFirstLetter: Boolean = True): string;
     class function Classify(const TableName: string): string;
     class function Memberify(const FieldName: string): string;
     class function Pluralize(const Word: string): string;
     class function Singularize(const Word: string): string;
+    class function Underscore(const CamelCasedWord: string): string;
   end;
 
 implementation
@@ -27,13 +29,13 @@ uses
   SysUtils;
 
 {**
- * By default, Camelize converts strings to UpperCamelCase. If the argument to FirstLetterInUppercase is set to False then Camelize produces lowerCamelCase.
+ * By default, Camelize converts strings to UpperCamelCase. If the argument to UppercaseFirstLetter is set to False then Camelize produces lowerCamelCase.
  *
- * @param string LowerCaseAndDelimitedWord
- * @param Boolean FirstLetterInUppercase
+ * @param string Term
+ * @param Boolean UppercaseFirstLetter
  * @return string
  *}
-class function TInflector.Camelize(const LowerCaseAndDelimitedWord: string; const FirstLetterInUppercase: Boolean = True): string;
+class function TInflector.Camelize(const Term: string; const UppercaseFirstLetter: Boolean = True): string;
 var
   i: Integer;
   cameled: string;
@@ -41,10 +43,10 @@ var
 begin
   humps := TStringList.Create;
   humps.Delimiter := WORD_DELIMITER;
-  humps.DelimitedText := LowerCaseAndDelimitedWord;
+  humps.DelimitedText := Term;
   for i := 0 to humps.Count - 1 do
     cameled := cameled + UpperCase(humps[i][1]) + Copy(humps[i], 2, MaxInt);
-  if (not FirstLetterInUppercase) then
+  if (not UppercaseFirstLetter) then
     Result := LowerCase(cameled[1]) + Copy(cameled, 2, MaxInt)
   else
     Result := cameled;
@@ -208,6 +210,30 @@ begin
     end;
   end;
   Result := found;
+end;
+
+{**
+ * Makes an underscored, lowercase form from the expression in the string.
+ *
+ * @param string CamelCasedWord
+ * @return string
+ *}
+class function TInflector.Underscore(const CamelCasedWord: string): string;
+var
+  i: Integer;
+  scored: string;
+  mice: TStringList;
+begin
+  mice := TStringList.Create;
+  mice.Delimiter := WORD_DELIMITER;
+  mice.DelimitedText := Term;
+  for i := 0 to mice.Count - 1 do
+    scored := scored + '_'UpperCase(mice[i][1]) + Copy(mice[i], 2, MaxInt);
+  if (not UppercaseFirstLetter) then
+    Result := LowerCase(scored[1]) + Copy(scored, 2, MaxInt)
+  else
+    Result := scored;
+  humps.Free;
 end;
 
 end.
