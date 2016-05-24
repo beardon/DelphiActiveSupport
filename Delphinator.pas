@@ -64,6 +64,8 @@ begin
   sqlTypeL := LowerCase(SQLType);
   if ((Pos('tinyint(1)', sqlTypeL) > 0) or (Pos('bool', sqlTypeL) > 0)) then
     delphiType := 'Boolean'
+  else if (Pos('bigint', sqlTypeL) > 0) then
+    delphiType := 'Int64'
   else if (Pos('int', sqlTypeL) > 0) then
     delphiType := 'Integer';
   if (Pos('decimal', sqlTypeL) > 0) then
