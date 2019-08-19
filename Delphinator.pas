@@ -44,7 +44,7 @@ end;
 
 class function TDelphinator.FixReservedWords(const Value: string): string;
 const
-  RESERVED_WORDS = 'ClassTypeUnitNameLabelProgramFile';
+  RESERVED_WORDS = 'ClassTypeUnitNameLabelProgramFileClassName';
 var
   corrected: string;
 begin
