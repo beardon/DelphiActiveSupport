@@ -21,7 +21,6 @@ uses
 
 const
   CRLF = #13#10;
-  CRLF2 = CRLF + CRLF;
   TAB = '  ';
   TAB2 = TAB + TAB;
 
@@ -34,14 +33,10 @@ begin
   outStr := InStr;
   if (Length(InStr) > BREAK_COUNT) then
   begin
-    if (Multiline) then
-    begin
-      delim := ''' + ' + CRLF + TAB2 + '''';
-    end
+    if Multiline then
+      delim := ''' + ' + CRLF + TAB2 + ''''
     else
-    begin
       delim := ''' + ''';
-    end;
     outStr := Copy(InStr, 1, BREAK_COUNT) + delim + ConcatLongString(Copy(InStr, BREAK_COUNT + 1, MaxInt), Multiline);
   end;
   Result := outStr;

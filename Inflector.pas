@@ -6,7 +6,6 @@ type
   TInflector = class
   private
     const WORD_DELIMITER = '_';
-    const WORD_DELIMITERS: array[0..1] of string = (' ', '_');
     class function IrregularToPlural(const Word: string): string;
     class function IrregularToSingular(const Word: string): string;
     class function Uncountable(const Word: string): Boolean;
@@ -46,7 +45,7 @@ begin
   humps.DelimitedText := Term;
   for i := 0 to humps.Count - 1 do
     cameled := cameled + UpperCase(humps[i][1]) + Copy(humps[i], 2, MaxInt);
-  if (not UppercaseFirstLetter) then
+  if not UppercaseFirstLetter then
     Result := LowerCase(cameled[1]) + Copy(cameled, 2, MaxInt)
   else
     Result := cameled;
@@ -137,7 +136,7 @@ begin
   for i := 0 to words.Count - 1 do
   begin
     pluralWord := words[i];
-    if (Not Uncountable(pluralWord)) then
+    if not Uncountable(pluralWord) then
     begin
       pluralWord := IrregularToPlural(pluralWord);
       if (pluralWord = words[i]) then
@@ -176,7 +175,7 @@ begin
   for i := 0 to words.Count - 1 do
   begin
     singularWord := words[i];
-    if (Not Uncountable(singularWord)) then
+    if not Uncountable(singularWord) then
     begin
       singularWord := IrregularToSingular(singularWord);
       if (singularWord = words[i]) then
@@ -229,7 +228,7 @@ begin
   mice.DelimitedText := Term;
   for i := 0 to mice.Count - 1 do
     scored := scored + '_'UpperCase(mice[i][1]) + Copy(mice[i], 2, MaxInt);
-  if (not UppercaseFirstLetter) then
+  if not UppercaseFirstLetter then
     Result := LowerCase(scored[1]) + Copy(scored, 2, MaxInt)
   else
     Result := scored;
