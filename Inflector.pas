@@ -5,17 +5,16 @@ interface
 type
   TInflector = class
   private
-    const WORD_DELIMITER = '_';
+  const WORD_DELIMITER = '_';
     class function IrregularToPlural(const Word: string): string;
     class function IrregularToSingular(const Word: string): string;
     class function Uncountable(const Word: string): Boolean;
   public
-    class function Camelize(const Term: string; const UppercaseFirstLetter: Boolean = True): string;
+    class function Camelize(const LowerCaseAndDelimitedWords: string; const FirstLetterInUppercase: Boolean = True): string;
     class function Classify(const TableName: string): string;
     class function Memberify(const FieldName: string): string;
     class function Pluralize(const Word: string): string;
     class function Singularize(const Word: string): string;
-    class function Underscore(const CamelCasedWord: string): string;
   end;
 
 implementation
@@ -25,16 +24,24 @@ uses
   Delphinator,
   Inflectors,
   RegularExpressions,
+  StrUtils,
   SysUtils;
 
 {**
- * By default, Camelize converts strings to UpperCamelCase. If the argument to UppercaseFirstLetter is set to False then Camelize produces lowerCamelCase.
+ * By default, Camelize converts strings to UpperCamelCase. If the argument to FirstLetterInUppercase is set to False then Camelize produces lowerCamelCase.
  *
- * @param string Term
- * @param Boolean UppercaseFirstLetter
+ * @param string LowerCaseAndDelimitedWord
+ * @param Boolean FirstLetterInUppercase
  * @return string
  *}
-class function TInflector.Camelize(const Term: string; const UppercaseFirstLetter: Boolean = True): string;
+class function TInflector.Camelize(const LowerCaseAndDelimitedWords: string; const FirstLetterInUppercase: Boolean = True): string;
+function TrimFinalDelimiter(const DelimitedWords: string): string;
+begin
+  if (AnsiRightStr(DelimitedWords, 1) = WORD_DELIMITER) then
+    Result := Copy(DelimitedWords, 1, (Length(DelimitedWords) - 1))
+  else
+    Result := DelimitedWords;
+end;
 var
   i: Integer;
   cameled: string;
@@ -42,10 +49,10 @@ var
 begin
   humps := TStringList.Create;
   humps.Delimiter := WORD_DELIMITER;
-  humps.DelimitedText := Term;
+  humps.DelimitedText := TrimFinalDelimiter(LowerCaseAndDelimitedWords);
   for i := 0 to humps.Count - 1 do
     cameled := cameled + UpperCase(humps[i][1]) + Copy(humps[i], 2, MaxInt);
-  if not UppercaseFirstLetter then
+  if not FirstLetterInUppercase then
     Result := LowerCase(cameled[1]) + Copy(cameled, 2, MaxInt)
   else
     Result := cameled;
@@ -91,7 +98,7 @@ begin
   irregular := Word;
   for i := High(INFLECTOR_IRREGULARS) downto Low(INFLECTOR_IRREGULARS) do
   begin
-    if LowerCase(irregular) = INFLECTOR_IRREGULARS[i, 0] then
+    if (LowerCase(irregular) = INFLECTOR_IRREGULARS[i, 0]) then
     begin
       irregular := INFLECTOR_IRREGULARS[i, 1];
       Break;
@@ -108,7 +115,7 @@ begin
   irregular := Word;
   for i := Low(INFLECTOR_IRREGULARS) to High(INFLECTOR_IRREGULARS) do
   begin
-    if LowerCase(irregular) = INFLECTOR_IRREGULARS[i, 1] then
+    if (LowerCase(irregular) = INFLECTOR_IRREGULARS[i, 1]) then
     begin
       irregular := INFLECTOR_IRREGULARS[i, 0];
       Break;
@@ -140,16 +147,16 @@ begin
     begin
       pluralWord := IrregularToPlural(pluralWord);
       if (pluralWord = words[i]) then
-      for j := High(INFLECTOR_PLURALS) downto Low(INFLECTOR_PLURALS) do
-      begin
-        pat := INFLECTOR_PLURALS[j, 0];
-        repl := INFLECTOR_PLURALS[j, 1];
-        if TRegEx.Match(pluralWord, pat, [roIgnoreCase]).Success then
+        for j := High(INFLECTOR_PLURALS) downto Low(INFLECTOR_PLURALS) do
         begin
-          pluralWord := TRegEx.Replace(pluralWord, pat, repl, [roIgnoreCase]);
-          break;
+          pat := INFLECTOR_PLURALS[j, 0];
+          repl := INFLECTOR_PLURALS[j, 1];
+          if TRegEx.Match(pluralWord, pat, [roIgnoreCase]).Success then
+          begin
+            pluralWord := TRegEx.Replace(pluralWord, pat, repl, [roIgnoreCase]);
+            break;
+          end;
         end;
-      end;
     end;
     words[i] := pluralWord;
   end;
@@ -179,14 +186,14 @@ begin
     begin
       singularWord := IrregularToSingular(singularWord);
       if (singularWord = words[i]) then
-      for j := High(INFLECTOR_SINGULARS) downto Low(INFLECTOR_SINGULARS) do
-      begin
-        if TRegEx.Match(singularWord, INFLECTOR_SINGULARS[j, 0], [roIgnoreCase]).Success then
+        for j := High(INFLECTOR_SINGULARS) downto Low(INFLECTOR_SINGULARS) do
         begin
-          singularWord := TRegEx.Replace(singularWord, INFLECTOR_SINGULARS[j, 0], INFLECTOR_SINGULARS[j, 1], [roIgnoreCase]);
-          Break;
+          if TRegEx.Match(singularWord, INFLECTOR_SINGULARS[j, 0], [roIgnoreCase]).Success then
+          begin
+            singularWord := TRegEx.Replace(singularWord, INFLECTOR_SINGULARS[j, 0], INFLECTOR_SINGULARS[j, 1], [roIgnoreCase]);
+            Break;
+          end;
         end;
-      end;
     end;
     words[i] := singularWord;
   end;
@@ -209,30 +216,6 @@ begin
     end;
   end;
   Result := found;
-end;
-
-{**
- * Makes an underscored, lowercase form from the expression in the string.
- *
- * @param string CamelCasedWord
- * @return string
- *}
-class function TInflector.Underscore(const CamelCasedWord: string): string;
-var
-  i: Integer;
-  scored: string;
-  mice: TStringList;
-begin
-  mice := TStringList.Create;
-  mice.Delimiter := WORD_DELIMITER;
-  mice.DelimitedText := Term;
-  for i := 0 to mice.Count - 1 do
-    scored := scored + '_'UpperCase(mice[i][1]) + Copy(mice[i], 2, MaxInt);
-  if not UppercaseFirstLetter then
-    Result := LowerCase(scored[1]) + Copy(scored, 2, MaxInt)
-  else
-    Result := scored;
-  humps.Free;
 end;
 
 end.

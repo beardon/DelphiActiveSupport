@@ -9,6 +9,7 @@ type
     class function GetMySQLTypeScale(const SQLType: string): Integer;
   public
     class function ConcatLongString(const InStr: string; const Multiline: Boolean): string;
+    class function IsMySQLTypeBoolean(const SQLType: string): Boolean;
     class function FixReservedWords(const Value: string): string;
     class function MySQLTypeToDelphiType(const SQLType: string; const IsNullable: Boolean): string;
     class function MySQLTypeToDelphiAsType(const SQLType: string; const IsNullable: Boolean): string;
@@ -86,6 +87,14 @@ begin
   Result := scale;
 end;
 
+class function TDelphinator.IsMySQLTypeBoolean(const SQLType: string): Boolean;
+var
+  sqlTypeL: string;
+begin
+  sqlTypeL := LowerCase(SQLType);
+  Result := (Pos('tinyint(1)', sqlTypeL) > 0);
+end;
+
 class function TDelphinator.MySQLTypeToDelphiType(const SQLType: string; const IsNullable: Boolean): string;
 var
   delphiType, sqlTypeL: string;
@@ -117,7 +126,7 @@ begin
 // TODO: MyDAC components will not assign TDate values to query parameters in expected format, will have to use TDateTime for all
   if ((Pos('date', sqlTypeL) > 0) or (Pos('time', sqlTypeL) > 0)) then
   begin
-    if (IsNullable) then
+    if IsNullable then
       delphiType := 'Variant'
     else
       delphiType := 'TDateTime';
@@ -135,9 +144,7 @@ begin
   asType := '';
   sqlTypeL := LowerCase(SQLType);
   scale := GetMySQLTypeScale(SQLType);
-  if (Pos('tinyint(1)', sqlTypeL) > 0) then
-    asType := 'AsBoolean'
-  else if (Pos('int', sqlTypeL) > 0) then
+  if (Pos('int', sqlTypeL) > 0) then
     asType := 'AsInteger';
   if (Pos('decimal', sqlTypeL) > 0) then
   begin
@@ -152,7 +159,7 @@ begin
     asType := 'AsString';
   if ((Pos('date', sqlTypeL) > 0) or (Pos('time', sqlTypeL) > 0)) then
   begin
-    if (IsNullable) then
+    if IsNullable then
       asType := 'AsVariant'
     else
       asType := 'AsDateTime';
