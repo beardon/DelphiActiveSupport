@@ -15,6 +15,7 @@ type
     class function Memberify(const FieldName: string): string;
     class function Pluralize(const Word: string): string;
     class function Singularize(const Word: string): string;
+    class function Underscore(const CamelCasedWord: string): string;
   end;
 
 implementation
@@ -216,6 +217,23 @@ begin
     end;
   end;
   Result := found;
+end;
+
+{**
+ * Makes an underscored, lowercase form from the expression in the string.
+ *
+ * @param string CamelCasedWord
+ * @return string
+ *}
+class function TInflector.Underscore(const CamelCasedWord: string): string;
+var
+  words: TStringList;
+begin
+  words := TStringList.Create;
+  words.Delimiter := ' ';
+  words.DelimitedText := CamelCasedWord;
+  words.Delimiter := '_';
+  Result := LowerCase(words.DelimitedText);
 end;
 
 end.
