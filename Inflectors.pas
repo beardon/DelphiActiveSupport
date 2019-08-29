@@ -4,9 +4,9 @@ interface
 
 const
   INFLECTOR_PLURALS: array[0..20, 0..1] of string =
-    (('(.*)$', '$1s'),
-    ('(.*)s$', '$1s'),
-    ('(ax|test)is$', '$1es'),
+    (('$', 's'),
+    ('s$', 's'),
+    ('^(ax|test)is$', '$1es'),
     ('(octop|vir)us$', '$1i'),
     ('(octop|vir)i$', '$1i'),
     ('(alias|status)$', '$1es'),
@@ -27,7 +27,7 @@ const
     ('(quiz)$', '$1zes'));
 
   INFLECTOR_SINGULARS: array[0..26, 0..1] of string =
-    (('(.*)s$', '$1'),
+    (('s$', ''),
     ('(ss)$', '$1'),
     ('(n)ews$', '$1ews'),
     ('([ti])a$', '$1um'),
